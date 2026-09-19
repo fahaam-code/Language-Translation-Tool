@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Language Translation Tool — CodeAlpha</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <span class="badge">CodeAlpha · AI Internship · Task 1</span>
+      <h1>🌐 Language Translation Tool</h1>
+      <p class="subtitle">Translate text between 100+ languages — with auto-detect, copy &amp; text-to-speech.</p>
+    </header>
+
+    <section class="card">
+      <!-- Error banner -->
+      <div id="error" class="error hidden" role="alert"></div>
+
+      <!-- Language bar -->
+      <div class="lang-bar">
+        <div class="lang-box">
+          <label for="source">From</label>
+          <div class="lang-row">
+            <select id="source">
+              <option value="auto" selected>Auto-detect</option>
+              {% for name, code in languages %}
+              <option value="{{ code }}">{{ name | title }}</option>
+              {% endfor %}
+            </select>
+            <button id="detect-btn" class="ghost" type="button" title="Detect the language of the input text">Detect</button>
+          </div>
+          <span id="detected" class="hint"></span>
+        </div>
+
+        <button id="swap-btn" class="swap" type="button" title="Swap languages">⇄</button>
+
+        <div class="lang-box">
+          <label for="target">To</label>
+          <select id="target">
+            {% for name, code in languages %}
+            <option value="{{ code }}" {% if code == 'en' %}selected{% endif %}>{{ name | title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Text panes -->
+      <div class="panes">
+        <div class="pane">
+          <textarea id="input" rows="8" placeholder="Type or paste text here…" maxlength="5000" spellcheck="false"></textarea>
+          <div class="pane-foot">
+            <span id="char-count">0 / 5,000</span>
+            <button id="clear-btn" class="ghost" type="button">Clear</button>
+          </div>
+        </div>
+
+        <div class="pane output-pane">
+          <div id="output" class="output" data-placeholder="Translation will appear here…"></div>
+          <div class="pane-foot">
+            <span id="status"></span>
+            <div class="actions">
+              <button id="speak-btn" class="ghost" type="button" title="Listen to the translation" disabled>🔊 Speak</button>
+              <button id="copy-btn" class="ghost" type="button" title="Copy translation" disabled>📋 Copy</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button id="translate-btn" class="primary" type="button">Translate →</button>
+    </section>
+
+    <footer>
+      <p>Built with Flask + <a href="https://deep-translator.readthedocs.io/" target="_blank" rel="noopener">deep-translator</a>
+         · TTS via the Web Speech API</p>
+    </footer>
+  </main>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
