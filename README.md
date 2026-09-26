@@ -1,36 +1,29 @@
-# CodeAlpha — Language Translation Tool
+# Language Translation Tool
 
-**CodeAlpha AI Internship · Task 1**
-
-A Flask web application that translates text between 100+ languages, with
-auto-detection, a copy button, and text-to-speech playback.
+A clean, minimal, and modern web application that translates text between 100+ languages with automatic detection and seamless language swapping.
 
 ## ✨ Features
 
-- **Translate text** between 100+ languages via the Google Translate API
-  (through the free [`deep-translator`](https://deep-translator.readthedocs.io/) library)
-- **Auto-detect** the source language — or pick it manually
-- **Swap languages** (and the text) with one click
-- **📋 Copy** the translation to the clipboard
-- **🔊 Text-to-speech** — listen to the translation in the target language
-  (Web Speech API, no extra dependencies)
-- Character counter, loading state, and friendly error messages
-- Responsive dark UI
+- **Multi-language translation** across 100+ languages via Google Translate (through [`deep-translator`](https://deep-translator.readthedocs.io/))
+- **Automatic language detection** with manual override option
+- **One-click language & text swap**
+- **Live character counter** and input clear button
+- **Aesthetic warm beige UI** with responsive layout for mobile and desktop
 
 ## 🛠️ Tech Stack
 
-| Layer     | Technology                          |
-|-----------|-------------------------------------|
-| Backend   | Python, Flask                       |
-| Translation | `deep-translator` (Google Translate API) |
-| Detection | `langdetect` (via deep-translator)  |
-| Frontend  | HTML, CSS, vanilla JavaScript       |
+| Layer       | Technology                                |
+|-------------|-------------------------------------------|
+| Backend     | Python, Flask                             |
+| Translation | `deep-translator` (Google Translate API)  |
+| Detection   | `langdetect` (fallback engine)            |
+| Frontend    | HTML5, Vanilla CSS (Warm Beige), JavaScript |
 
 ## 🚀 Setup & Run
 
 ```bash
 # 1. Create and activate a virtual environment
-py -m venv .venv
+python -m venv .venv
 .venv\Scripts\activate        # Windows
 # source .venv/bin/activate   # macOS / Linux
 
@@ -43,34 +36,24 @@ python app.py
 
 Then open **http://127.0.0.1:5000** in your browser.
 
-> An internet connection is required — translation requests go to the
-> Google Translate endpoint.
+> An active internet connection is required for fetching translations.
 
 ## 📁 Project Structure
 
 ```
-CodeAlpha_LanguageTranslationTool/
-├── app.py                  # Flask routes (/ , /api/translate, /api/detect)
+LanguageTranslationTool/
+├── app.py                  # Flask application & /api/translate route
 ├── templates/
-│   └── index.html          # Main UI page
+│   └── index.html          # Clean application interface
 ├── static/
-│   ├── style.css           # Styling
-│   └── script.js           # Front-end logic (translate, copy, TTS, swap)
+│   ├── style.css           # Warm beige aesthetic design system
+│   └── script.js           # Client-side translation & interaction logic
 ├── requirements.txt
 └── README.md
 ```
 
-## 🔌 API
+## 🔌 API Endpoints
 
-| Endpoint          | Method | Body                                   | Response                     |
-|-------------------|--------|----------------------------------------|------------------------------|
-| `/api/translate`  | POST   | `{"text", "source", "target"}`         | `{"translated", ...}`        |
-| `/api/detect`     | POST   | `{"text"}`                             | `{"code", "name"}`           |
-
-## 📸 Screenshot
-
-_(Add a screenshot of the running app here before submitting — e.g. a
-translation from English to Spanish.)_
-
----
-Built as part of the [CodeAlpha](https://www.codealpha.tech/) AI Internship.
+| Endpoint          | Method | Payload                                | Response                      |
+|-------------------|--------|----------------------------------------|-------------------------------|
+| `/api/translate`  | POST   | `{"text", "source", "target"}`         | `{"translated", ...}`         |

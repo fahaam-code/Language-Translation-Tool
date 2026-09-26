@@ -1,4 +1,4 @@
-"""CodeAlpha Task 1 — Language Translation Tool.
+"""Language Translation Tool.
 
 Flask web app that translates text between 100+ languages using the free
 Google Translate API (via the deep-translator library).
@@ -6,10 +6,9 @@ Google Translate API (via the deep-translator library).
 Features
 --------
 * Source / target language dropdowns (with auto-detect)
-* Copy-to-clipboard button
-* Text-to-speech playback in the browser (Web Speech API)
-* Language auto-detection endpoint
-* Clean, responsive dark UI
+* One-click language & text swap
+* Clear text & character counter
+* Clean, minimal beige UI
 """
 
 from __future__ import annotations
@@ -51,7 +50,7 @@ def index():
 
 
 def _detect_language(text: str) -> str | None:
-    """Best-effort local language detection (langdetect, no API key)."""
+    """Best-effort local language detection (langdetect, used for fallback engine)."""
     try:
         return langdetect_detect(text)
     except LangDetectException:
@@ -132,25 +131,7 @@ def translate():
             logger.exception("Translation request failed")
             return jsonify(error="Translation failed. Check your internet connection and try again."), 502
 
-    resolved_source = source if source != "auto" else (_detect_language(text) or "auto")
-    return jsonify(translated=translated, source=resolved_source, target=target, engine=engine)
-
-
-@app.post("/api/detect")
-def detect():
-    """Detect the language of the given text (used by the 'Detect language' button)."""
-    data = request.get_json(silent=True) or {}
-    text = (data.get("text") or "").strip()
-    if not text:
-        return jsonify(error="Enter some text first."), 400
-    code = _detect_language(text)
-    if code is None:
-        return jsonify(error="Could not detect the language — try more text."), 400
-    name = next(
-        (name for name, c in _supported_languages().items() if c.lower() == code.lower()),
-        code,
-    )
-    return jsonify(code=code, name=name.replace("_", " ").title())
+    return jsonify(translated=translated, source=source, target=target, engine=engine)
 
 
 if __name__ == "__main__":

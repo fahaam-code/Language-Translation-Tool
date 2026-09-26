@@ -9,14 +9,10 @@ const sourceSel = $("source");
 const targetSel = $("target");
 const translateBtn = $("translate-btn");
 const swapBtn = $("swap-btn");
-const detectBtn = $("detect-btn");
 const clearBtn = $("clear-btn");
-const copyBtn = $("copy-btn");
-const speakBtn = $("speak-btn");
 const charCount = $("char-count");
 const statusEl = $("status");
 const errorEl = $("error");
-const detectedEl = $("detected");
 
 const MAX_CHARS = 5000;
 
@@ -51,7 +47,12 @@ function updateCharCount() {
 
 function setBusy(busy) {
   translateBtn.disabled = busy;
-  translateBtn.textContent = busy ? "Translating…" : "Translate →";
+  const label = translateBtn.querySelector("span");
+  if (label) {
+    label.textContent = busy ? "Translating…" : "Translate";
+  } else {
+    translateBtn.textContent = busy ? "Translating…" : "Translate";
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -76,9 +77,7 @@ async function translate() {
       target: targetSel.value,
     });
     output.textContent = data.translated;
-    copyBtn.disabled = false;
-    speakBtn.disabled = false;
-    const engineNote = data.engine && data.engine.includes("fallback") ? " · via fallback engine" : "";
+    const engineNote = data.engine && data.engine.includes("fallback") ? " (fallback engine)" : "";
     statusEl.textContent = `✓ Translated to ${targetSel.options[targetSel.selectedIndex].text}${engineNote}`;
   } catch (err) {
     showError(err.message);
@@ -94,89 +93,36 @@ async function translate() {
 function swapLanguages() {
   const s = sourceSel.value;
   const t = targetSel.value;
-  if (s === "auto") {
-    // Swapping from auto-detect: use the detected language if we know it.
-    const detected = detectedEl.dataset.code;
-    sourceSel.value = detected || "en";
-  } else {
-    sourceSel.value = t;
-  }
-  targetSel.value = s === "auto" ? "en" : s;
-  detectedEl.textContent = "";
-  delete detectedEl.dataset.code;
 
-  // If both panes have content, swap the text too.
+  // Swap dropdown selections: if source was auto, swap target into source, and set target to en
+  sourceSel.value = t;
+  targetSel.value = s === "auto" ? "en" : s;
+
+  // If both panes have content, swap text too
   if (output.textContent && input.value) {
     const temp = input.value;
     input.value = output.textContent;
     output.textContent = "";
-    copyBtn.disabled = true;
-    speakBtn.disabled = true;
     statusEl.textContent = "";
     updateCharCount();
   }
 }
 
 /* ------------------------------------------------------------------ */
-/* Detect language                                                    */
+/* Clear                                                              */
 /* ------------------------------------------------------------------ */
 
-async function detectLanguage() {
-  const text = input.value.trim();
+function clearAll() {
+  input.value = "";
+  output.textContent = "";
+  statusEl.textContent = "";
   clearError();
-  if (!text) {
-    showError("Enter some text first, then press Detect.");
-    return;
-  }
-  detectedEl.textContent = "Detecting…";
-  try {
-    const data = await postJSON("/api/detect", { text });
-    detectedEl.textContent = `Detected: ${data.name}`;
-    detectedEl.dataset.code = data.code;
-  } catch (err) {
-    detectedEl.textContent = "";
-    showError(err.message);
-  }
+  updateCharCount();
+  input.focus();
 }
 
 /* ------------------------------------------------------------------ */
-/* Copy + text-to-speech                                              */
-/* ------------------------------------------------------------------ */
-
-async function copyOutput() {
-  const text = output.textContent;
-  if (!text) return;
-  try {
-    await navigator.clipboard.writeText(text);
-  } catch {
-    // Fallback for browsers without the async clipboard API.
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("copy");
-    ta.remove();
-  }
-  const original = copyBtn.textContent;
-  copyBtn.textContent = "✓ Copied";
-  setTimeout(() => (copyBtn.textContent = original), 1200);
-}
-
-function speakOutput() {
-  const text = output.textContent;
-  if (!text || !("speechSynthesis" in window)) {
-    if (!("speechSynthesis" in window)) showError("Text-to-speech is not supported in this browser.");
-    return;
-  }
-  window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = targetSel.value; // e.g. "es", "fr", "hi"
-  utterance.rate = 0.95;
-  window.speechSynthesis.speak(utterance);
-}
-
-/* ------------------------------------------------------------------ */
-/* Wire up                                                            */
+/* Event Listeners                                                    */
 /* ------------------------------------------------------------------ */
 
 translateBtn.addEventListener("click", translate);
@@ -184,22 +130,7 @@ input.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === "Enter") translate();
 });
 input.addEventListener("input", updateCharCount);
-
 swapBtn.addEventListener("click", swapLanguages);
-detectBtn.addEventListener("click", detectLanguage);
-clearBtn.addEventListener("click", () => {
-  input.value = "";
-  output.textContent = "";
-  statusEl.textContent = "";
-  detectedEl.textContent = "";
-  delete detectedEl.dataset.code;
-  copyBtn.disabled = true;
-  speakBtn.disabled = true;
-  clearError();
-  updateCharCount();
-  input.focus();
-});
-copyBtn.addEventListener("click", copyOutput);
-speakBtn.addEventListener("click", speakOutput);
+clearBtn.addEventListener("click", clearAll);
 
 updateCharCount();
